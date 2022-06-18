@@ -1,1 +1,3 @@
-placeholder for when we eventually open-source this
+### Covid Risk Calculator
+
+Made in 2 days for a local hackathon. 

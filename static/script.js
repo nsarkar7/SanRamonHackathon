@@ -209,7 +209,7 @@ function show_data(fips) {
       </tr>
     </table>
     <p style="font-size: 24px; margin-top: 6px">${score_final}/10</p>
-    <p class="text2">Calculated Risk Score</p>
+    <p class="text2">Overall Risk Score</p>
     
     <hr style="margin-left: auto; margin-right: auto; margin-top: 8px; width: 300px">
 

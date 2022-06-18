@@ -1,0 +1,39 @@
+<html>
+  <head>
+    <title>Safe Vacation</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css"
+     integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ=="
+     crossorigin=""/>
+      <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"
+     integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ=="
+     crossorigin=""></script>
+    
+    <link rel="stylesheet" href="/static/style.css">
+  </head>
+  <body>
+
+    <table id=table>
+      <tr>
+        <td id="search_container">
+            <form  action="javascript: search_bar_handler()">
+              <div style="display: flex">
+                <input type="text" placeholder="Enter a city..." id="search_bar" name="Search" value="" style="width: 100%;">
+                <input type="submit" id="searchButton" value="Submit" id="searchButtoh">
+              </div>
+            </form>
+
+          <table id="results_table">
+            <!-- results go here -->
+          </table>
+
+        </td>
+
+        <td id="map_container">
+          <div id="map"></div>
+          <script src="/static/script.js"></script>
+          <!-- map goes here -->
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

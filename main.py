@@ -3,14 +3,13 @@ from datetime import datetime
 from flask import Flask, render_template, request, redirect
 app = Flask(__name__)
 
-#init variables
+
 county_data = []
 cdc_ratings = []
 api_key = replit.db["api_key"]
 
 #----------------------
-#cdc data
-#https://www.cdc.gov/coronavirus/2019-ncov/json/cdt-ccl-data.json
+
 
 @app.route("/")
 def homepage():

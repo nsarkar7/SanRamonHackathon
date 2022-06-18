@@ -43,6 +43,8 @@ function get_county(city) {
   }
 }
 
+
+
 function search_bar_handler() {
   var city = document.getElementById("search_bar").value; 
   if (city != "") {
@@ -203,3 +205,5 @@ function show_data(county_name) {
   </div>
   `);
 }
+
+

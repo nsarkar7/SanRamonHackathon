@@ -15,25 +15,21 @@
 
     <table id=table>
       <tr>
-        <td id="search_container">
-            <form  action="javascript: search_bar_handler()">
+        <td style="width: 350px; position:relative;" valign="top">
+          <div id="search_container">
+            <form action="javascript: search_bar_handler()">
               <div style="display: flex">
                 <input type="text" placeholder="Enter a city..." id="search_bar" name="Search" value="" style="width: 100%;">
                 <input type="submit" id="searchButton" value="Submit" id="searchButtoh">
               </div>
             </form>
-
-          <table id="results_table">
-            <tr>
-              <td>
-                <p style="font-size: 14px; margin-top: 8px;">
-                  Simply search for a city and we will calculate a risk score based on data from multiple websites. 
-                </p>
-              </td>
-            </tr>
-            <!-- results go here -->
-          </table>
-
+            <div id="results_div">
+              <p style="font-size: 14px; margin-top: 8px;">
+                Simply search for a city and we will calculate a risk score based on data from multiple sources. 
+              </p>
+              <!-- results go here -->
+            </div>
+          </div>
         </td>
 
         <td id="map_container">

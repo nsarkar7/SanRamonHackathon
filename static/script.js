@@ -17,6 +17,7 @@ function search_city(query) {
   return results
 }; 
 
+//unused
 function get_county(city) {
   var name_split = city.display_name.split(", ");
   if (name_split.pop() == "United States") {
@@ -56,12 +57,9 @@ function get_county_fips(city) {
 function search_bar_handler() {
   var city = document.getElementById("search_bar").value; 
   if (city != "") {
-    var table = document.getElementById("results_table");
-    table.innerHTML = "";
-    var row = table.insertRow(-1);
-    var cell = row.insertCell(0);
-    cell.className = "table_cell";
-    cell.innerHTML =(`
+    var div = document.getElementById("results_div");
+    div.innerHTML = "";
+    div.innerHTML = (`
       <p style="font-size: 14px; margin-top: 8px">Loading results...</p>`
       );
     
@@ -82,7 +80,7 @@ function search_bar_handler() {
       else {
         console.log("No results found for "+city)
   
-        cell.innerHTML = ( `
+        div.innerHTML = ( `
         <p style="font-size: 14px; margin-top: 8px">City not found.</p>
         `)
       }
@@ -105,7 +103,7 @@ function title_case(str) {
 function show_data(fips) {  
   console.log("Getting case data...");
 
-  var table = document.getElementById("results_table");
+  var div = document.getElementById("results_div");
   
   var request = new XMLHttpRequest();
   var url = `/api/case_data/?fips=${fips}`
@@ -198,11 +196,8 @@ function show_data(fips) {
     var test_positivity_ratio_pretty = "Unknown";
   }
 
-  table.innerHTML = "";
-  var row = table.insertRow(-1);
-  var cell = row.insertCell(0);
-  cell.className = "table_cell";
-  cell.innerHTML = (`
+  div.innerHTML = "";
+  div.innerHTML =  (`
   <div style="text-align: center;"> 
     <p style="font-size: 36px; margin: 0px padding: 0px">${title_case(document.getElementById("search_bar").value)}</p>
     <p style="font-size: 16px; margin-top: -10px;">${result.county}, ${result.state}</p> 
@@ -214,33 +209,33 @@ function show_data(fips) {
       </tr>
     </table>
     <p style="font-size: 24px; margin-top: 6px">${score_final}/10</p>
-    <p style="font-size: 12px; margin-botom: 4px">Calculated Risk Score</p>
+    <p class="text2">Calculated Risk Score</p>
     
-    <hr style="margin-top: 8px; width: 300px">
+    <hr style="margin-left: auto; margin-right: auto; margin-top: 8px; width: 300px">
 
-    <p style="font-size: 24px; margin-top: 8px">${weekly_cases}</p>
-    <p style="font-size: 12px; margin-bottom: 4px">Weekly New Cases</p>
+    <p class="text1">${weekly_cases}</p>
+    <p class="text2">Weekly New Cases</p>
 
-    <p style="font-size: 24px; margin: 0px">${case_count_pretty}</p>
-    <p style="font-size: 12px; margin-bottom: 4px">Total Cases</p>
+    <p class="text1">${case_count_pretty}</p>
+    <p class="text2">Total Cases</p>
 
-    <p style="font-size: 24px; margin-top: 8px">${new_cases_per_100k}</p>
-    <p style="font-size: 12px; margin-bottom: 4px">Weekly Cases Per 100k Population</p>
+    <p class="text1">${new_cases_per_100k}</p>
+    <p class="text2">Weekly Cases Per 100k Population</p>
 
-    <p style="font-size: 24px; margin: 0px">${vaxxed_percent_pretty}</p>
-    <p style="font-size: 12px; margin-bottom: 4px">Vaccinated (at least 2 doses)</p>
+    <p class="text1">${vaxxed_percent_pretty}</p>
+    <p class="text2">Vaccination Rate (at least 2 doses)</p>
 
-    <p style="font-size: 24px; margin: 0px">${infection_rate_pretty}</p>
-    <p style="font-size: 12px; margin-bottom: 4px">Infection Rate</p>
+    <p class="text1">${infection_rate_pretty}</p>
+    <p class="text2">Infection Rate</p>
 
-    <p style="font-size: 24px; margin: 0px">${cdc_rating_pretty}</p>
-    <p style="font-size: 12px; margin-bottom: 4px">CDC Community Level</p>
+    <p class="text1">${cdc_rating_pretty}</p>
+    <p class="text2">CDC Community Level</p>
 
-    <p style="font-size: 24px; margin: 0px">${result.actuals.deaths}</p>
-    <p style="font-size: 12px; margin-bottom: 4px">Total Deaths</p>
+    <p class="text1">${result.actuals.deaths}</p>
+    <p class="text2">Total Deaths</p>
 
-    <p style="font-size: 24px; margin: 0px">${test_positivity_ratio_pretty}</p>
-    <p style="font-size: 12px; margin-bottom: 4px">Test Positivity Ratio</p>
+    <p class="text1">${test_positivity_ratio_pretty}</p>
+    <p class="text2">Test Positivity Ratio</p>
   </div>
   `);
 }

@@ -24,7 +24,7 @@ html, body{
   width: 100%;
   margin: 0;
   padding: 0;
-  table-layout: fixed
+  table-layout: fixed;
 }
 
 #map { 
@@ -33,23 +33,26 @@ html, body{
   padding: 0;
 }
 #search_container {
-  overflow-y:scroll;
   width: 350px;
+  max-height: 100%;
   overflow: auto;
   vertical-align: top;
-  margin: 0;
-  padding: 0;
+  margin: 0px;
+  padding: 0px;
+  border-collapse: collapse;
+  position: absolute;
+  top: 0px;
+  left: 0px;
 }
 
 #search_bar {
   margin: 0;
   padding: 0;
 }
-#results_table {
+#results_div {
   width: 100%;
   margin-top: 0px;
   text-align:center;
-  display: flex;
   justify-content: center;
 }
 #map {
@@ -106,4 +109,13 @@ html, body{
   margin-top: 3%;
   color: white;
   
+}
+
+.text1 {
+  font-size: 24px; 
+  margin-top: 8px
+}
+.text2 {
+  font-size: 12px; 
+  margin-bottom: 4px
 }

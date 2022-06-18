@@ -63,6 +63,7 @@ html, body{
   border-radius: 5px;
   border-color: white;
   border-width: 2px;
+  margin: auto;
 }
 
 #risk_bar {
@@ -73,9 +74,9 @@ html, body{
     --map-tiles-filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
 }
 
-@media (prefers-color-scheme: dark) {
+@media {
     .map-tiles {
-        filter:var(--map-tiles-filter, none);
+      filter:var(--map-tiles-filter, none);
 	}
 }
 

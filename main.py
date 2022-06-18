@@ -77,9 +77,12 @@ def get_cdc_data():
   query = request.args.get("county")
   fips = request.args.get("fips")
   if fips != None:
+    if fips.startswith("0"):
+      fips = fips.replace("0", "", 1)
     for county in cdc_ratings:
       if county["fips_code"] == fips:
         return {"results": [county, 0]}
+    return "FIPS code not found."
   else:
     if query == None:
       return {"results": cdc_ratings}
@@ -95,9 +98,9 @@ def get_cdc_data():
           results.append((county, len(matches)))
       results = sorted(results, key=lambda x: x[1], reverse=True)
 
-  if len(results) < 1:
-    return {"results": []}
-  return {"results": results[0]}
+    if len(results) < 1:
+      return {"results": []}
+    return {"results": results[0]}
 
 def download_cases():
   global county_data

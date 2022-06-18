@@ -14,7 +14,9 @@ html, body{
   font-family: "Poppins";
 }
 
-
+a {
+  color: CornflowerBlue;
+}
 
 #searchButton {
   height: 60px;

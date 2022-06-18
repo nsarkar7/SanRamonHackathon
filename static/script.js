@@ -5,6 +5,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors | Data from the CDC and Covid Act Now',
     className: 'map-tiles'
 }).addTo(map);
+var layerGroup = L.layerGroup().addTo(map);
 
 function search_city(query) {
   console.log("Searching for cities... Query: "+query);
@@ -43,32 +44,48 @@ function get_county(city) {
   }
 }
 
-
+function get_county_fips(city) {
+  var request = new XMLHttpRequest();
+  var url = `/api/fips/?x=${city.lon}&y=${city.lat}`
+  request.open("GET", url, false);
+  request.send();
+  
+ return request.responseText;
+}
 
 function search_bar_handler() {
   var city = document.getElementById("search_bar").value; 
   if (city != "") {
-    var data = search_city(city);
-    console.log(data);
-    if (data.length > 0) {
-      var county = get_county(data[0]);
-      console.log(county);
-      map.setView([data[0].lat, data[0].lon]);
-      var marker = L.marker([data[0].lat, data[0].lon]).addTo(map);
-      show_data(county);
-    }
+    var table = document.getElementById("results_table");
+    table.innerHTML = "";
+    var row = table.insertRow(-1);
+    var cell = row.insertCell(0);
+    cell.className = "table_cell";
+    cell.innerHTML =(`
+      <p style="font-size: 14px; margin-top: 8px">Loading results...</p>`
+      );
+    
+    setTimeout(function() {
+        run(city);
+    }, 100);
 
-    else {
-      console.log("No results found for "+city)
-      var table = document.getElementById("results_table");
-      table.innerHTML = "";
-      var row = table.insertRow(-1);
-      var cell = row.insertCell(0);
-      cell.className = "table_cell";
-
-      cell.innerHTML =( `
-      <p style="font-size: 14px; margin-top: 8px">City not found.</p>
-      `)
+    function run(city) {
+      var data = search_city(city);
+      if (data.length > 0) {
+        var fips = get_county_fips(data[0]);
+        map.setView([data[0].lat, data[0].lon]);
+        layerGroup.clearLayers();
+        var marker = L.marker([data[0].lat, data[0].lon]).addTo(layerGroup);
+        show_data(fips);
+      }
+  
+      else {
+        console.log("No results found for "+city)
+  
+        cell.innerHTML = ( `
+        <p style="font-size: 14px; margin-top: 8px">City not found.</p>
+        `)
+      }
     }
   }
   else {
@@ -85,29 +102,26 @@ function title_case(str) {
   );
 }
 
-function show_data(county_name) {  
+function show_data(fips) {  
   console.log("Getting case data...");
+
+  var table = document.getElementById("results_table");
   
   var request = new XMLHttpRequest();
-  var url = `/api/case_data/?county=${county_name}`
+  var url = `/api/case_data/?fips=${fips}`
   request.open("GET", url, false);
   request.send();
-  
   var results = JSON.parse(request.responseText);
   result = results.results[0];
 
   var request2 = new XMLHttpRequest();
-  var url2 = `/api/cdc_data/?county=${county_name}`
+  var url2 = `/api/cdc_data/?fips=${fips}`
   request2.open("GET", url2, false);
   request2.send();
-  
   var cdc_data = JSON.parse(request2.responseText);
   cdc_data = cdc_data.results[0];
   
-  var total_cases = result.actuals.cases;
-  
   var pct_vaccinated = Math.round((result.actuals.vaccinationsCompleted / result.population)*100);
-
   var balancer = result.population / 100000;
   var weekly_cases = parseInt(result.metrics.weeklyNewCasesPer100k * balancer);
 
@@ -123,15 +137,17 @@ function show_data(county_name) {
   console.log(cdc_data);
   var cdc_rating = +((parseInt(cdc_data.CCL_community_burden_level_integer)+1) / 0.3).toFixed(2);
   var new_cases_per_100k = result.metrics.weeklyNewCasesPer100k;
-  var cases_rate =  Math.min(new_cases_per_100k/60, 10);
-  var infection_rate_risk = result.riskLevels.infectionRate / 0.3
+  var cases_rate =  result.riskLevels.caseDensity * 2;
+  var infection_rate_risk = result.riskLevels.infectionRate*2;
   
+  var test_positivity_ratio = result.metrics.testPositivityRatio;
+  var test_positivity_score = result.riskLevels.testPositivityRatio*2;
 
-  var unfiltered_scores = [vaxxed_score, cdc_rating, cases_rate, infection_rate_risk];
-  console.log(unfiltered_scores);
+  var unfiltered_scores = [vaxxed_score, cdc_rating, cases_rate, infection_rate_risk, test_positivity_score];
+  console.log(unfiltered_scores); 
   var filtered_scores = [];
   for (let i = 0; i < unfiltered_scores.length; i++) {
-    if (unfiltered_scores[i] <= 100 & unfiltered_scores[i] != null) {
+    if (unfiltered_scores[i] <= 10 & unfiltered_scores[i] != null) {
       filtered_scores.push(unfiltered_scores[i]);
     }
   }
@@ -152,7 +168,7 @@ function show_data(county_name) {
     risk = "Low Risk";
     color = "#00CC66";
   }
-  else if (score_final >= 5 && score_final <= 7) {
+  else if (score_final >= 5 && score_final < 7) {
     risk = "Medium Risk";
     color = "yellow"
   }
@@ -161,21 +177,36 @@ function show_data(county_name) {
     color = "red"
   }
   var cdc_rating_pretty = ["Low", "Medium", "High", "Unknown"][cdc_data.CCL_community_burden_level_integer]
-  var risk_bar_width = Math.round(score_final*24.28)
-  
-  var table = document.getElementById("results_table");
+  var risk_bar_width = Math.round(score_final*24.28);
+
+  if (result.metrics.infectionRate != null) {
+    var infection_rate_pretty = result.metrics.infectionRate;
+  }
+  else {
+    var infection_rate_pretty = "Unknown"
+  }
+  if (result.actuals.cases != null) {
+    var case_count_pretty = result.actuals.cases;
+  }
+  else {
+    var case_count_pretty = "Unknown";
+  }
+  if (test_positivity_ratio != null) {
+    var test_positivity_ratio_pretty = result.metrics.testPositivityRatio;
+  }
+  else {
+    var test_positivity_ratio_pretty = "Unknown";
+  }
+
   table.innerHTML = "";
   var row = table.insertRow(-1);
   var cell = row.insertCell(0);
-
   cell.className = "table_cell";
-
   cell.innerHTML = (`
-  <div> 
+  <div style="text-align: center;"> 
     <p style="font-size: 36px; margin: 0px padding: 0px">${title_case(document.getElementById("search_bar").value)}</p>
-    <p style="font-size: 16px; margin-top: -10px;">${result.county}</p> 
+    <p style="font-size: 16px; margin-top: -10px;">${result.county}, ${result.state}</p> 
     <p style="font-size: 28px; margin-top: 0px; color: ${color}">${risk}</p>
-
     <table id="risk_bar_table">
       <tr id="risk_bar_background">
         <td id="risk_bar" style="width: ${risk_bar_width}px; background-color: ${color}"></td>
@@ -184,11 +215,13 @@ function show_data(county_name) {
     </table>
     <p style="font-size: 24px; margin-top: 6px">${score_final}/10</p>
     <p style="font-size: 12px; margin-botom: 4px">Calculated Risk Score</p>
+    
+    <hr style="margin-top: 8px; width: 300px">
 
     <p style="font-size: 24px; margin-top: 8px">${weekly_cases}</p>
-    <p style="font-size: 12px; margin-bottom: 4px">Weekly Cases</p>
+    <p style="font-size: 12px; margin-bottom: 4px">Weekly New Cases</p>
 
-    <p style="font-size: 24px; margin: 0px">${total_cases}</p>
+    <p style="font-size: 24px; margin: 0px">${case_count_pretty}</p>
     <p style="font-size: 12px; margin-bottom: 4px">Total Cases</p>
 
     <p style="font-size: 24px; margin-top: 8px">${new_cases_per_100k}</p>
@@ -197,11 +230,17 @@ function show_data(county_name) {
     <p style="font-size: 24px; margin: 0px">${vaxxed_percent_pretty}</p>
     <p style="font-size: 12px; margin-bottom: 4px">Vaccinated (at least 2 doses)</p>
 
-    <p style="font-size: 24px; margin: 0px">${result.metrics.infectionRate}</p>
+    <p style="font-size: 24px; margin: 0px">${infection_rate_pretty}</p>
     <p style="font-size: 12px; margin-bottom: 4px">Infection Rate</p>
 
     <p style="font-size: 24px; margin: 0px">${cdc_rating_pretty}</p>
     <p style="font-size: 12px; margin-bottom: 4px">CDC Community Level</p>
+
+    <p style="font-size: 24px; margin: 0px">${result.actuals.deaths}</p>
+    <p style="font-size: 12px; margin-bottom: 4px">Total Deaths</p>
+
+    <p style="font-size: 24px; margin: 0px">${test_positivity_ratio_pretty}</p>
+    <p style="font-size: 12px; margin-bottom: 4px">Test Positivity Ratio</p>
   </div>
   `);
 }
